@@ -5,13 +5,13 @@ import config from "@/config";
 
 const UserService = {
   async me(): Promise<User> {
-    const response = await ApiService.get(`${config.BACKEND}/.auth/me`);
+    const response = await ApiService.get(`${config.AUTH}/me`);
     return new User(response.data[0]);
   },
 
   async lists(userName: string): Promise<Array<IUserList>> {
     const response = await ApiService.get(
-      `${config.BACKEND}/api/links/user/${userName}`
+      `${config.API}/links/user/${userName}`
     );
     return response ? <Array<IUserList>>response.data : [];
   }

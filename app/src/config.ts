@@ -1,10 +1,11 @@
 export default {
   FRONTEND: process.env.VUE_APP_FRONTEND,
-  BACKEND: process.env.VUE_APP_BACKEND,
+  API: `${process.env.VUE_APP_BACKEND}/.api`,
+  AUTH: `${process.env.VUE_APP_BACKEND}/.auth`,
   AUTH_URL: function(provider: string) {
     return `${
-      process.env.VUE_APP_BACKEND
-    }/.auth/login/${provider}?post_login_redirect_url=${
+     this.AUTH
+    }/login/${provider}?post_login_redirect_url=${
       process.env.VUE_APP_FRONTEND
     }`;
   },
