@@ -1,0 +1,147 @@
+@import url("https://use.fontawesome.com/releases/v5.6.3/css/all.css");
+@import "./bulma-custom.scss";
+
+.beta-bump {
+  margin-top: 10px;
+}
+
+html,
+body {
+  height: 100%;
+  text-rendering: auto;
+  text-size-adjust: 100%;
+  background-color: #f9fafc;
+}
+
+body {
+  padding: 0;
+  margin: 0;
+  font-family: "Roboto", sans-serif;
+  color: #222c38;
+  font-size: 18px;
+}
+
+.input,
+.textarea {
+  outline: none;
+  padding: 0px 10px;
+  height: 3.5rem;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  border-color: #979797;
+  line-height: 1.5;
+  width: 100%;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  &.is-invalid {
+    border-width: 4px;
+    border-color: $danger;
+    -webkit-animation-name: shakeError;
+    animation-name: shakeError;
+    -webkit-animation-fill-mode: forward;
+    animation-fill-mode: forward;
+    -webkit-animation-duration: 0.6s;
+    animation-duration: 0.6s;
+    -webkit-animation-timing-function: ease-in-out;
+    animation-timing-function: ease-in-out;
+  }
+}
+
+.textarea {
+  &[rows] {
+    height: 3.5rem;
+    min-height: auto;
+  }
+  &:not([rows]) {
+    height: auto;
+  }
+}
+
+a {
+  color: $primary;
+}
+
+.navbar-burger {
+  width: inherit;
+  height: inherit;
+}
+
+.tag:not(body) {
+  border-radius: 20px;
+}
+
+.main {
+  max-width: 960px;
+  padding: 0px 10px;
+}
+
+.section {
+  padding-top: 0px;
+}
+
+.header {
+  top: 0;
+  width: 100%;
+  background: #fff;
+  -webkit-box-shadow: 0 5px 40px 1px #e8e8e8;
+  box-shadow: 0 5px 40px 1px #e8e8e8;
+}
+
+.card {
+  border-radius: 4px;
+  box-shadow: 0 5px 40px 1px #e8e8e8;
+}
+
+.content {
+  margin-top: 100px;
+}
+
+.x {
+  text-decoration: none;
+  color: inherit;
+}
+
+.is-heading {
+  margin: 40px 0;
+}
+
+.navbar-link[data-v-4295d220]:hover {
+  background-color: white;
+  color: $primary;
+}
+
+.navbar-link[data-v-4295d220]:not(.is-arrowless)::after {
+  border-color: $primary;
+}
+
+@keyframes shakeError {
+  0% {
+    transform: translateX(0);
+  }
+  15% {
+    transform: translateX(0.375rem);
+  }
+  30% {
+    transform: translateX(-0.375rem);
+  }
+  45% {
+    transform: translateX(0.375rem);
+  }
+  60% {
+    transform: translateX(-0.375rem);
+  }
+  75% {
+    transform: translateX(0.375rem);
+  }
+  90% {
+    transform: translateX(-0.375rem);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.errorMessage {
+  height: 10px;
+  margin-top: 5px;
+}
