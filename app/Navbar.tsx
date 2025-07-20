@@ -20,7 +20,7 @@ export default function Navbar() {
           <NavigationMenuList className="flex gap-6">
             <NavigationMenuItem>
               <NavigationMenuLink asChild className="text-base font-medium">
-                <Link href="/new">New</Link>
+                <Link href="/s/list">New</Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
             <NavigationMenuItem>
