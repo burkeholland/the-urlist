@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import React, { useRef } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
@@ -42,22 +42,21 @@ const normalizeUrl = (url: string) => {
 };
 
 export default function ListPage() {
+  // Local state for the links array
+  const [links, setLinks] = React.useState([]);
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
       description: "",
       vanity_url: "",
-      links: [],
+      // links: [], // Remove from defaultValues
     },
   });
 
   const urlInputRef = useRef<HTMLInputElement>(null);
-
-  // Local state for the current URL input
   const [currentUrl, setCurrentUrl] = React.useState("");
-
-  // Open Graph preview state
   const [loadingPreview, setLoadingPreview] = React.useState(false);
   const [previewError, setPreviewError] = React.useState<string | null>(null);
 
@@ -87,8 +86,8 @@ export default function ListPage() {
         if (!res.ok) {
           setPreviewError(data.error || "Failed to fetch preview.");
         } else {
-          // Immediately add the link with Open Graph info
-          form.setValue("links", [...form.getValues("links"), {
+          // Add the link with Open Graph info to local state
+          setLinks([...links, {
             url: data.url,
             title: data.title,
             description: data.description,
@@ -106,16 +105,15 @@ export default function ListPage() {
 
   // Remove a link
   const handleRemoveLink = (idx: number) => {
-    const links = form.getValues("links");
-    form.setValue("links", links.filter((_, i) => i !== idx));
+    setLinks(links.filter((_, i) => i !== idx));
   };
 
-  const onSubmit = async (values: FormValues) => {
+  const onSubmit = async (values: Omit<FormValues, "links">) => {
     try {
       const res = await fetch("/api/lists", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+        body: JSON.stringify({ ...values, links }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -192,7 +190,7 @@ export default function ListPage() {
               {loadingPreview && <div className="mt-2 text-sm text-gray-500">Loading preview...</div>}
               {previewError && <div className="mt-2 text-sm text-red-500">{previewError}</div>}
               <ul className="mt-4 space-y-4">
-                {form.getValues("links").map((link, idx) => (
+                {links.map((link, idx) => (
                   <li key={idx} className="w-full bg-white rounded-lg shadow flex items-center gap-4 p-4 border">
                     {link.icon && (
                       <img src={link.icon} alt="icon" className="w-12 h-12 object-contain rounded" />
@@ -216,7 +214,7 @@ export default function ListPage() {
                 ))}
               </ul>
             </div>
-            <Button type="submit" disabled={form.formState.isSubmitting || form.getValues("links").length === 0}>
+            <Button type="submit" disabled={form.formState.isSubmitting || links.length === 0}>
               {form.formState.isSubmitting ? "Creating..." : "Create List"}
             </Button>
             <FormMessage>{form.formState.errors.root?.message}</FormMessage>
