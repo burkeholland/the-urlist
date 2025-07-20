@@ -75,14 +75,35 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: listError?.message || 'Failed to create list.' }, { status: 500 });
   }
 
-  // Insert links
-  const linksToInsert = links.map((link: any) => ({
-    list_id: list.id,
-    url: link.url,
-    title: null,
-    description: null,
-    icon: null,
-  }));
+  // Scrape Open Graph metadata for each link
+  const ogs = (await import('open-graph-scraper')).default;
+  const linksToInsert = [];
+  for (const link of links) {
+    let ogTitle = null;
+    let ogDescription = null;
+    let ogIcon = null;
+    try {
+      const { result } = await ogs({ url: link.url });
+      if (result.success) {
+        ogTitle = result.ogTitle || null;
+        ogDescription = result.ogDescription || null;
+        if (Array.isArray(result.ogImage) && result.ogImage.length > 0 && result.ogImage[0].url) {
+          ogIcon = result.ogImage[0].url;
+        } else if (result.favicon) {
+          ogIcon = result.favicon;
+        }
+      }
+    } catch (err) {
+      // If scraping fails, leave fields as null
+    }
+    linksToInsert.push({
+      list_id: list.id,
+      url: link.url,
+      title: ogTitle,
+      description: ogDescription,
+      icon: ogIcon,
+    });
+  }
 
   const { error: linksError } = await supabase
     .from('links')

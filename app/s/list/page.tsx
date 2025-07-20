@@ -17,6 +17,9 @@ import { z } from "zod";
 
 const linkSchema = z.object({
   url: z.string().url({ message: "Must be a valid URL" }),
+  title: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
+  icon: z.string().optional().nullable(),
 });
 
 const formSchema = z.object({
@@ -29,6 +32,14 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
+
+const normalizeUrl = (url: string) => {
+  // If the URL does not start with http:// or https://, prepend https://
+  if (!/^https?:\/\//i.test(url)) {
+    return `https://${url}`;
+  }
+  return url;
+};
 
 export default function ListPage() {
   const form = useForm<FormValues>({
@@ -46,12 +57,17 @@ export default function ListPage() {
   // Local state for the current URL input
   const [currentUrl, setCurrentUrl] = React.useState("");
 
+  // Open Graph preview state
+  const [loadingPreview, setLoadingPreview] = React.useState(false);
+  const [previewError, setPreviewError] = React.useState<string | null>(null);
+
   // Add URL to links array
-  const handleUrlKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleUrlKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      const url = currentUrl.trim();
+      let url = currentUrl.trim();
       if (!url) return;
+      url = normalizeUrl(url);
       // Validate URL
       const result = linkSchema.safeParse({ url });
       if (!result.success) {
@@ -59,9 +75,32 @@ export default function ListPage() {
         return;
       }
       form.clearErrors("root");
-      form.setValue("links", [...form.getValues("links"), { url }]);
-      setCurrentUrl("");
-      urlInputRef.current?.focus();
+      setLoadingPreview(true);
+      setPreviewError(null);
+      try {
+        const res = await fetch("/api/og-preview", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setPreviewError(data.error || "Failed to fetch preview.");
+        } else {
+          // Immediately add the link with Open Graph info
+          form.setValue("links", [...form.getValues("links"), {
+            url: data.url,
+            title: data.title,
+            description: data.description,
+            icon: data.icon,
+          }]);
+          setCurrentUrl("");
+          urlInputRef.current?.focus();
+        }
+      } catch {
+        setPreviewError("Network error.");
+      }
+      setLoadingPreview(false);
     }
   };
 
@@ -145,14 +184,26 @@ export default function ListPage() {
                     value={currentUrl}
                     onChange={(e) => setCurrentUrl(e.target.value)}
                     onKeyDown={handleUrlKeyDown}
+                    disabled={loadingPreview}
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
-              <ul className="mt-4 space-y-2">
+              {loadingPreview && <div className="mt-2 text-sm text-gray-500">Loading preview...</div>}
+              {previewError && <div className="mt-2 text-sm text-red-500">{previewError}</div>}
+              <ul className="mt-4 space-y-4">
                 {form.getValues("links").map((link, idx) => (
-                  <li key={idx} className="flex items-center gap-2">
-                    <span className="truncate max-w-xs">{link.url}</span>
+                  <li key={idx} className="w-full bg-white rounded-lg shadow flex items-center gap-4 p-4 border">
+                    {link.icon && (
+                      <img src={link.icon} alt="icon" className="w-12 h-12 object-contain rounded" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-bold text-lg truncate">{link.title ? link.title : link.url}</div>
+                      {link.description && (
+                        <div className="text-gray-600 text-sm mt-1 truncate">{link.description}</div>
+                      )}
+                      <div className="text-xs text-gray-400 mt-1 break-all">{link.url}</div>
+                    </div>
                     <Button
                       type="button"
                       variant="destructive"
