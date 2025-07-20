@@ -12,7 +12,7 @@ export default function Navbar() {
     <nav className="w-full border-b bg-white dark:bg-black">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
         {/* Site Name */}
-        <div className="font-bold text-xl text-primary">
+        <div className="font-bold text-xl text-primary mr-8">
           <Link href="/">The Urlist</Link>
         </div>
         {/* Menu Items */}
