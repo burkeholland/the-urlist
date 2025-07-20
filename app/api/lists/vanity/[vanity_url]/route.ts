@@ -10,15 +10,24 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function GET(req: Request, { params }: { params: { vanity_url: string } }) {
   const { vanity_url } = params;
-  const { data: list, error } = await supabase
+  const { data: list, error: listError } = await supabase
     .from('lists')
-    .select('id')
+    .select('*')
     .eq('vanity_url', vanity_url)
     .single();
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (listError || !list) {
+    return NextResponse.json({ error: listError?.message || 'List not found.' }, { status: 404 });
   }
 
-  return NextResponse.json({ exists: !!list }, { status: 200 });
+  const { data: links, error: linksError } = await supabase
+    .from('links')
+    .select('*')
+    .eq('list_id', list.id);
+
+  if (linksError) {
+    return NextResponse.json({ error: linksError.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ list: { ...list, links } }, { status: 200 });
 }

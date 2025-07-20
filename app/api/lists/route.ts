@@ -8,18 +8,49 @@ if (!supabaseUrl || !supabaseKey) {
 }
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+function generateRandomVanityUrl(length = 6) {
+  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
 export async function POST(req: Request) {
   const body = await req.json();
-  const { title, description, vanity_url, links } = body;
+  let { title, description, vanity_url, links } = body;
 
   // Basic validation
   if (!title || !Array.isArray(links) || links.length === 0) {
     return NextResponse.json({ error: 'Missing required fields.' }, { status: 400 });
   }
 
-  // Check vanity_url uniqueness
-  const sanitizedVanityUrl = typeof vanity_url === 'string' ? vanity_url.trim() : '';
-  if (sanitizedVanityUrl) {
+  // Sanitize vanity_url
+  let sanitizedVanityUrl = typeof vanity_url === 'string' ? vanity_url.trim() : '';
+
+  // If no vanity_url provided, generate one
+  if (!sanitizedVanityUrl) {
+    let unique = false;
+    let attempts = 0;
+    while (!unique && attempts < 10) {
+      const candidate = generateRandomVanityUrl();
+      const { data: existing } = await supabase
+        .from('lists')
+        .select('id')
+        .eq('vanity_url', candidate)
+        .single();
+      if (!existing) {
+        sanitizedVanityUrl = candidate;
+        unique = true;
+      }
+      attempts++;
+    }
+    if (!unique) {
+      return NextResponse.json({ error: 'Could not generate a unique vanity URL.' }, { status: 500 });
+    }
+  } else {
+    // Check vanity_url uniqueness if provided
     const { data: existing } = await supabase
       .from('lists')
       .select('id')
@@ -33,12 +64,11 @@ export async function POST(req: Request) {
   // Create list
   const { data: list, error: listError } = await supabase
     .from('lists')
-    .insert({ title, description: description ?? null, vanity_url: sanitizedVanityUrl || null })
+    .insert({ title, description: description ?? null, vanity_url: sanitizedVanityUrl })
     .select()
     .single();
 
   if (listError || !list) {
-    // Check for unique constraint violation on vanity_url
     if (listError?.message && listError.message.includes('duplicate key value violates unique constraint')) {
       return NextResponse.json({ error: 'Vanity URL is already taken.' }, { status: 409 });
     }

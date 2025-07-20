@@ -80,11 +80,9 @@ export default function ListPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        form.setError("root", {
-          message: data.error || "Failed to create list.",
-        });
+        form.setError("root", { message: data.error || "Failed to create list." });
       } else {
-        window.location.href = `/s/list/${data.list.id}`;
+        window.location.href = `/s/list/${data.list.vanity_url}`;
       }
     } catch {
       form.setError("root", { message: "Network error." });
