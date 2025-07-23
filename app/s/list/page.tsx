@@ -45,22 +45,24 @@ const normalizeUrl = (url: string) => {
 
 
 export default function ListPage() {
-  // Local state for the links array
+  // Use react-hook-form for links array
   type LinkType = {
     url: string;
     title?: string | null;
     description?: string | null;
     icon?: string | null;
   };
-  const [links, setLinks] = React.useState<LinkType[]>([]);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
       description: "",
       vanity_url: "",
+      links: [],
     },
   });
+  const links = form.watch("links");
+  const setLinks = (newLinks: LinkType[]) => form.setValue("links", newLinks);
   const urlInputRef = useRef<HTMLInputElement>(null);
   const [currentUrl, setCurrentUrl] = React.useState("");
   const [loadingPreview, setLoadingPreview] = React.useState(false);
@@ -110,7 +112,7 @@ export default function ListPage() {
 
   // Remove a link
   const handleRemoveLink = (idx: number) => {
-    setLinks(links.filter((_, i) => i !== idx));
+  setLinks(links.filter((_, i) => i !== idx));
   };
 
   const onSubmit = async (values: Omit<FormValues, "links">) => {
@@ -118,7 +120,7 @@ export default function ListPage() {
       const res = await fetch("/api/lists", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...values, links }),
+        body: JSON.stringify({ ...values, links: form.getValues("links") }),
       });
       const data = await res.json();
       if (!res.ok) {
