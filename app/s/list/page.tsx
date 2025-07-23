@@ -11,9 +11,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { LinkInput } from "@/components/LinkInput";
+import { LinkList, LinkType } from "@/components/LinkList";
 import React, { useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -46,12 +46,7 @@ const normalizeUrl = (url: string) => {
 
 export default function ListPage() {
   // Use react-hook-form for links array
-  type LinkType = {
-    url: string;
-    title?: string | null;
-    description?: string | null;
-    icon?: string | null;
-  };
+  // LinkType is now imported from LinkList
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -63,12 +58,12 @@ export default function ListPage() {
   });
   const links = form.watch("links");
   const setLinks = (newLinks: LinkType[]) => form.setValue("links", newLinks);
-  const urlInputRef = useRef<HTMLInputElement>(null);
+  const urlInputRef = useRef<HTMLInputElement>(null) as React.RefObject<HTMLInputElement>;
   const [currentUrl, setCurrentUrl] = React.useState("");
   const [loadingPreview, setLoadingPreview] = React.useState(false);
   const [previewError, setPreviewError] = React.useState<string | null>(null);
 
-  // Add URL to links array
+  // Add URL to links array (moved to LinkInput)
   const handleUrlKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -112,7 +107,7 @@ export default function ListPage() {
 
   // Remove a link
   const handleRemoveLink = (idx: number) => {
-  setLinks(links.filter((_, i) => i !== idx));
+    setLinks(links.filter((_, i) => i !== idx));
   };
 
   const onSubmit = async (values: Omit<FormValues, "links">) => {
@@ -192,68 +187,17 @@ export default function ListPage() {
                 </div>
               </section>
               {/* Section 2: Big Input for New Links */}
-              <section className="mb-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-lg font-semibold">Add New Link</h2>
-                  <Badge variant="secondary" className="ml-2">{links.length} added</Badge>
-                </div>
-                <FormItem>
-                  <FormLabel>Paste a URL and press Enter</FormLabel>
-                  <FormControl>
-                    <Input
-                      ref={urlInputRef}
-                      placeholder="https://example.com"
-                      value={currentUrl}
-                      onChange={(e) => setCurrentUrl(e.target.value)}
-                      onKeyDown={handleUrlKeyDown}
-                      disabled={loadingPreview}
-                      className="bg-gray-50 border border-gray-200 rounded-lg text-xl py-4 px-4"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-                {loadingPreview && (
-                  <div className="mt-2 flex items-center gap-2 text-sm text-gray-500">
-                    <svg className="animate-spin h-4 w-4 text-indigo-400" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg>
-                    Loading preview...
-                  </div>
-                )}
-                {previewError && (
-                  <Alert variant="destructive" className="mt-2">
-                    <AlertTitle>Error</AlertTitle>
-                    <AlertDescription>{previewError}</AlertDescription>
-                  </Alert>
-                )}
-              </section>
+              <LinkInput
+                currentUrl={currentUrl}
+                setCurrentUrl={setCurrentUrl}
+                loadingPreview={loadingPreview}
+                previewError={previewError}
+                onKeyDown={handleUrlKeyDown}
+                urlInputRef={urlInputRef}
+                linksCount={links.length}
+              />
               {/* Section 3: Links List */}
-              <section>
-                <h2 className="text-lg font-semibold mb-4">Links List</h2>
-                <ul className="space-y-4">
-                  {links.map((link, idx) => (
-                    <li key={idx} className="transition-all duration-200 w-full bg-white rounded-xl shadow flex items-center gap-4 p-4 border border-gray-100 hover:shadow-lg">
-                      {link.icon && (
-                        <img src={link.icon} alt="icon" className="w-12 h-12 object-contain rounded-lg border border-gray-200" />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <div className="font-bold text-lg truncate text-indigo-700">{link.title ? link.title : link.url}</div>
-                        {link.description && (
-                          <div className="text-gray-600 text-sm mt-1 truncate">{link.description}</div>
-                        )}
-                        <div className="text-xs text-gray-400 mt-1 break-all">{link.url}</div>
-                      </div>
-                      <Badge variant="outline" className="mr-2">Link</Badge>
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleRemoveLink(idx)}
-                      >
-                        Remove
-                      </Button>
-                    </li>
-                  ))}
-                </ul>
-              </section>
+              <LinkList links={links} onRemove={handleRemoveLink} />
               {/* Error and submit button */}
               {form.formState.errors.root?.message && (
                 <Alert variant="destructive" className="mt-4">
