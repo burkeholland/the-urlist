@@ -9,7 +9,7 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function GET(req: Request, { params }: { params: { vanity_url: string } }) {
-  const { vanity_url } = params;
+  const { vanity_url } = await params;
   const { data: list, error: listError } = await supabase
     .from('lists')
     .select('*')

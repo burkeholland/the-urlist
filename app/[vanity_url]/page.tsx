@@ -2,13 +2,21 @@ import { Container } from "@/components/ui/container";
 import React from "react";
 
 async function fetchList(vanity_url: string) {
-  const res = await fetch(`/api/lists/vanity/${vanity_url}`);
+  // Use absolute URL for server-side fetch
+  const isServer = typeof window === "undefined";
+  let url = `/api/lists/vanity/${vanity_url}`;
+  if (isServer) {
+    const base = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    url = `${base}/api/lists/vanity/${vanity_url}`;
+  }
+  const res = await fetch(url);
   if (!res.ok) return null;
   return res.json();
 }
 
 export default async function ListDetailPage({ params }: { params: { vanity_url: string } }) {
-  const data = await fetchList(params.vanity_url);
+  const { vanity_url } = await params;
+  const data = await fetchList(vanity_url);
   if (!data || !data.list) {
     return (
       <main>
