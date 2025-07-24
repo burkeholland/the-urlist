@@ -25,12 +25,12 @@ export function LinkInput({
 }: LinkInputProps) {
   return (
     <section className="mb-4">
-      <div className="flex items-center justify-between mb-2">
-        <h2 className="text-lg font-semibold">Add New Link</h2>
-        <Badge variant="secondary" className="ml-2">{linksCount} added</Badge>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-2xl font-bold">Add New Link</h2>
+        <Badge variant="secondary" className="ml-2 text-lg px-4 py-2">{linksCount} added</Badge>
       </div>
       <FormItem>
-        <FormLabel>Paste a URL and press Enter</FormLabel>
+        <FormLabel className="text-xl font-semibold mb-2">Paste a URL and press Enter</FormLabel>
         <FormControl>
           <Input
             ref={urlInputRef}
@@ -39,7 +39,7 @@ export function LinkInput({
             onChange={(e) => setCurrentUrl(e.target.value)}
             onKeyDown={onKeyDown}
             disabled={loadingPreview}
-            className="bg-gray-50 border border-gray-200 rounded-lg text-xl py-4 px-4"
+            className="bg-gray-50 border-2 border-indigo-300 rounded-2xl text-3xl py-7 px-8 shadow-lg focus:ring-4 focus:ring-indigo-200 transition-all"
           />
         </FormControl>
         <FormMessage />

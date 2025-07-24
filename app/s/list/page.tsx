@@ -131,13 +131,13 @@ export default function ListPage() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-blue-100">
       <Container>
-        <div className="pt-8 max-w-3xl mx-auto w-full">
+  <div className="pt-8 max-w-6xl mx-auto w-full px-4">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-14">
               {/* Section 1: List Details - large and prominent */}
-              <section className="mb-6 bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+              <section className="mb-10 bg-white rounded-2xl shadow-lg border border-gray-100 p-10">
                 <h2 className="text-3xl font-bold mb-4">List Details</h2>
-                <p className="text-lg text-gray-500 mb-6">Give your list a title, description, and custom URL.</p>
+                <p className="text-lg text-gray-500 mb-8">Give your list a title, description, and custom URL.</p>
                 <div className="flex flex-col md:flex-row gap-6">
                   <div className="flex-1">
                     <FormField
@@ -187,20 +187,24 @@ export default function ListPage() {
                 </div>
               </section>
               {/* Section 2: Big Input for New Links */}
-              <LinkInput
-                currentUrl={currentUrl}
-                setCurrentUrl={setCurrentUrl}
-                loadingPreview={loadingPreview}
-                previewError={previewError}
-                onKeyDown={handleUrlKeyDown}
-                urlInputRef={urlInputRef}
-                linksCount={links.length}
-              />
+              <div className="mb-8">
+                <LinkInput
+                  currentUrl={currentUrl}
+                  setCurrentUrl={setCurrentUrl}
+                  loadingPreview={loadingPreview}
+                  previewError={previewError}
+                  onKeyDown={handleUrlKeyDown}
+                  urlInputRef={urlInputRef}
+                  linksCount={links.length}
+                />
+              </div>
               {/* Section 3: Links List */}
-              <LinkList links={links} onRemove={handleRemoveLink} />
+              <div className="mb-8">
+                <LinkList links={links} onRemove={handleRemoveLink} />
+              </div>
               {/* Error and submit button */}
               {form.formState.errors.root?.message && (
-                <Alert variant="destructive" className="mt-4">
+                <Alert variant="destructive" className="mb-8">
                   <AlertTitle>Error</AlertTitle>
                   <AlertDescription>{form.formState.errors.root?.message}</AlertDescription>
                 </Alert>
@@ -208,7 +212,7 @@ export default function ListPage() {
               <Button
                 type="submit"
                 disabled={form.formState.isSubmitting || links.length === 0}
-                className="w-full mt-8 py-3 text-lg font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-blue-500 text-white rounded-xl shadow-lg hover:scale-[1.02] transition-transform"
+                className="w-full py-4 text-lg font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-blue-500 text-white rounded-xl shadow-lg hover:scale-[1.02] transition-transform"
               >
                 {form.formState.isSubmitting ? "Creating..." : "Create List"}
               </Button>
