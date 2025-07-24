@@ -87,19 +87,46 @@ export default function ListPage() {
         });
         const data = await res.json();
         if (!res.ok) {
-          setPreviewError(data.error || "Failed to fetch preview.");
+          // If preview fetch fails, add link with just the URL as title, do not show error
+          setLinks([
+            ...links,
+            {
+              url,
+              title: url,
+              description: null,
+              icon: null,
+            },
+          ]);
+          setPreviewError(null); // Do not show preview error
+          setCurrentUrl("");
+          urlInputRef.current?.focus();
         } else {
-          setLinks([...links, {
-            url: data.url,
-            title: data.title,
-            description: data.description,
-            icon: data.icon,
-          }]);
+          setLinks([
+            ...links,
+            {
+              url: data.url,
+              title: data.title,
+              description: data.description,
+              icon: data.icon,
+            },
+          ]);
           setCurrentUrl("");
           urlInputRef.current?.focus();
         }
       } catch {
+        // On network error, add link with just the URL as title and show error
+        setLinks([
+          ...links,
+          {
+            url,
+            title: url,
+            description: null,
+            icon: null,
+          },
+        ]);
         setPreviewError("Network error.");
+        setCurrentUrl("");
+        urlInputRef.current?.focus();
       }
       setLoadingPreview(false);
     }
