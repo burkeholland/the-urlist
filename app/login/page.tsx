@@ -1,14 +1,19 @@
 "use client";
 
+
 import { createClient } from '@supabase/supabase-js';
 import { useState } from 'react';
 import { FcGoogle } from 'react-icons/fc';
+import { Container } from "@/components/ui/container";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
-
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -65,65 +70,80 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-blue-100">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 flex flex-col gap-6 mx-4">
-        <h1 className="text-3xl font-bold text-center text-blue-700 mb-2">
-          {isSignUp ? 'Create an account' : 'Sign in to your account'}
-        </h1>
-        <form onSubmit={isSignUp ? handleSignUp : handleLogin} className="flex flex-col gap-4">
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            className="border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            className="border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-            required
-          />
-          <button
-            type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg font-semibold shadow transition disabled:opacity-50"
-            disabled={loading}
-          >
-            {loading ? (isSignUp ? 'Signing up...' : 'Logging in...') : (isSignUp ? 'Sign Up' : 'Login')}
-          </button>
-        </form>
-        <div className="flex items-center gap-2 my-2">
-          <div className="flex-1 h-px bg-gray-200" />
-          <span className="text-gray-400 text-sm">or</span>
-          <div className="flex-1 h-px bg-gray-200" />
+    <main className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-blue-100 flex items-center justify-center">
+      <Container>
+        <div className="flex items-center justify-center min-h-[80vh]">
+          <Card className="w-full max-w-md p-10 flex flex-col gap-8 border border-gray-200 shadow-xl rounded-2xl bg-white/90">
+            <h1 className="text-4xl font-extrabold text-center text-indigo-700 drop-shadow-sm pt-2 pb-2">
+              {isSignUp ? 'Create an account' : 'Sign in to your account'}
+            </h1>
+            {error && (
+              <Alert variant="destructive" className="mb-2">
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            {success && (
+              <Alert variant="default" className="mb-2">
+                <AlertTitle>Success</AlertTitle>
+                <AlertDescription>{success}</AlertDescription>
+              </Alert>
+            )}
+            <form onSubmit={isSignUp ? handleSignUp : handleLogin} className="flex flex-col gap-5">
+              <Input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                className="text-base py-3 px-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400"
+              />
+              <Input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+                className="text-base py-3 px-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400"
+              />
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 text-lg font-semibold"
+              >
+                {loading ? (isSignUp ? 'Signing up...' : 'Logging in...') : (isSignUp ? 'Sign Up' : 'Login')}
+              </Button>
+            </form>
+            <div className="flex items-center gap-2 my-2">
+              <div className="flex-1 h-px bg-gray-200" />
+              <span className="text-gray-400 text-sm">or</span>
+              <div className="flex-1 h-px bg-gray-200" />
+            </div>
+            <Button
+              variant="outline"
+              onClick={handleGoogleLogin}
+              disabled={loading}
+              className="flex items-center justify-center gap-2 w-full py-3 text-lg font-semibold"
+            >
+              <FcGoogle size={22} />
+              {loading ? 'Redirecting...' : (isSignUp ? 'Sign up with Google' : 'Sign in with Google')}
+            </Button>
+            <div className="flex justify-center mt-2">
+              <button
+                type="button"
+                className="text-indigo-600 hover:underline text-sm"
+                onClick={() => {
+                  setIsSignUp(!isSignUp);
+                  setError('');
+                  setSuccess('');
+                }}
+              >
+                {isSignUp ? 'Already have an account? Login' : "Don't have an account? Sign Up"}
+              </button>
+            </div>
+          </Card>
         </div>
-        <button
-          onClick={handleGoogleLogin}
-          className="flex items-center justify-center gap-2 bg-white border border-gray-300 hover:bg-gray-50 p-3 rounded-lg font-semibold shadow transition disabled:opacity-50"
-          disabled={loading}
-        >
-          <FcGoogle size={22} />
-          {loading ? 'Redirecting...' : (isSignUp ? 'Sign up with Google' : 'Sign in with Google')}
-        </button>
-        <div className="flex justify-center mt-2">
-          <button
-            type="button"
-            className="text-blue-600 hover:underline text-sm"
-            onClick={() => {
-              setIsSignUp(!isSignUp);
-              setError('');
-              setSuccess('');
-            }}
-          >
-            {isSignUp ? 'Already have an account? Login' : "Don't have an account? Sign Up"}
-          </button>
-        </div>
-        {error && <div className="text-red-600 text-center mt-2">{error}</div>}
-        {success && <div className="text-green-600 text-center mt-2">{success}</div>}
-      </div>
-    </div>
+      </Container>
+    </main>
   );
 }
