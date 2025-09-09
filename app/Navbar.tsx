@@ -6,6 +6,7 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
 } from "@/components/ui/navigation-menu"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function Navbar() {
   return (
@@ -35,8 +36,9 @@ export default function Navbar() {
             </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
-        {/* Login Button */}
-        <div className="ml-auto">
+        {/* Theme Toggle and Login Button */}
+        <div className="ml-auto flex items-center gap-2">
+          <ThemeToggle />
           <Button asChild>
             <Link href="/login">Login</Link>
           </Button>
